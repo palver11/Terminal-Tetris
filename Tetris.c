@@ -3,9 +3,10 @@
 
 
 int main() {
-  printf("%s\n", CUBE[0]);
-  printf("%s\n", CUBE[1]);
-  printf("%s\n", CUBE[2]);
+  while (1) {
+    printf("%s\n", CUBE[1]);
+    system("cls");
+  }
 
 
   getchar();

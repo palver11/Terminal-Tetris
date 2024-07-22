@@ -1,41 +1,79 @@
 #include "Figures.h"
 
 
-static const FIGURE_ROWS = 4;
-static const FIGURE_COLS = 3;
+// --------------------------------------------------
+//                     Variables
+// --------------------------------------------------
 
-const char CUBE[FIGURE_ROWS][FIGURE_COLS] = {
+const char* GAME_FIELD[19] = {
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################",
+  "#####################"
+};
+
+const char* CUBE[2] = {
   "##",
   "##"
 };  
 
-const char ZZAG_L[FIGURE_ROWS][FIGURE_COLS] = {
+const char* ZZAG_L[3] = {
   "# ",
   "##",
   " #"
 };  
 
-const char ZZAG_R[FIGURE_ROWS][FIGURE_COLS] = {
+const char* ZZAG_R[3] = {
   " #",
   "##",
   "# "
 };  
 
-const char HOCKEY_L[FIGURE_ROWS][FIGURE_COLS] = {
+const char* HOCKEY_L[3] = {
   "##",
   " #",
   " #"
 };  
 
-const char HOCKEY_R[FIGURE_ROWS][FIGURE_COLS] = {
+const char* HOCKEY_R[3] = {
   "##",
   "# ",
   "# "
 };  
 
-const char STICK[FIGURE_ROWS][FIGURE_COLS] = {
+const char* STICK[4] = {
   "#",
   "#",
   "#",
-  "#",
-};  
+  "#"
+};
+
+// --------------------------------------------------
+//                     Functions
+// --------------------------------------------------
+
+// HOW TO GET QUANTITY OF STRINGS IN AN 2D ARRAY?
+void Draw(char** element) {
+
+  for (int e = sizeof(element) / element[0], i = 0; i < e; i++) {
+    for (int y = 0; ie = strlen() {
+
+    }
+
+  }
+}
