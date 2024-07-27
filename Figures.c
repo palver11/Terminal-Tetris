@@ -1,11 +1,13 @@
-#include "Figures.h"
+#include "figures.h"
+#include <stdio.h>
+#include <string.h>
 
 
 // --------------------------------------------------
 //                     Variables
 // --------------------------------------------------
 
-const char* GAME_FIELD[19] = {
+const char* GAME_FIELD[20] = {
   "#####################",
   "#####################",
   "#####################",
@@ -27,36 +29,36 @@ const char* GAME_FIELD[19] = {
   "#####################"
 };
 
-const char* CUBE[2] = {
+const char* CUBE[3] = {
   "##",
   "##"
 };  
 
-const char* ZZAG_L[3] = {
+const char* ZZAG_L[4] = {
   "# ",
   "##",
   " #"
 };  
 
-const char* ZZAG_R[3] = {
+const char* ZZAG_R[4] = {
   " #",
   "##",
   "# "
 };  
 
-const char* HOCKEY_L[3] = {
+const char* HOCKEY_L[4] = {
   "##",
   " #",
   " #"
 };  
 
-const char* HOCKEY_R[3] = {
+const char* HOCKEY_R[4] = {
   "##",
   "# ",
   "# "
 };  
 
-const char* STICK[4] = {
+const char* STICK[5] = {
   "#",
   "#",
   "#",
@@ -67,13 +69,19 @@ const char* STICK[4] = {
 //                     Functions
 // --------------------------------------------------
 
-// HOW TO GET QUANTITY OF STRINGS IN AN 2D ARRAY?
-void Draw(char** element) {
+void draw_field(const char** land) {
 
-  for (int e = sizeof(element) / element[0], i = 0; i < e; i++) {
-    for (int y = 0; ie = strlen() {
+  int rows = 0;
+  // Get the number of rows in the array
+  while (land[rows] != NULL) {
+    rows++;
+  }
 
+  // Draw the game field
+  for (int i = 0; i < rows; i++) {
+    for (int y = 0, len = strlen(land[i]); y < len; y++) {
+      printf("%c", land[i][y]);
     }
-
+    printf("\n");
   }
 }

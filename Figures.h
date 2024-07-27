@@ -9,4 +9,6 @@ extern const char* HOCKEY_L[];
 extern const char* HOCKEY_R[];
 extern const char* STICK   [];
 
+void draw_field(const char** land);
+
 #endif 

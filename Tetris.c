@@ -1,14 +1,21 @@
 #include <stdio.h>
-#include "Figures.h"
+#include <time.h>
+#include "figures.h"
+#include "termirend.h"
 
+typedef char* string;
 
 int main() {
+  int q = 0;
   while (1) {
-    printf("%s\n", CUBE[1]);
-    system("cls");
+    wait(2);
+
+    draw_field(CUBE);
+
+    printf("\n%d", ++q);
   }
 
-
+  printf("\n ** Enter anything and press enter to terminate the program **\n");
   getchar();
   return 0;
 }

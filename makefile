@@ -2,10 +2,10 @@
 CC = gcc
 
 # Define any compile-time flags
-CFLAGS = -Wall -Wextra -pedantic -std=c11
+CFLAGS = -g -Wall -Wextra -pedantic -std=c11
 
 # Define the source files
-SRC = Tetris.c Figures.c
+SRC = tetris.c termirend.c figures.c
 
 # Define the executable file
 EXEC = Tetris
