@@ -1,21 +1,23 @@
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
 #include "figures.h"
-#include "termirend.h"
+// #include "termirend.h"
 
 typedef char* string;
 
+int fps = 3;
+
 int main() {
-  int q = 0;
   while (1) {
-    wait(2);
+    usleep(1000000 / fps);
+    system("cls");
 
-    draw_field(CUBE);
-
-    printf("\n%d", ++q);
+    draw_element(GAME_FIELD);
   }
 
   printf("\n ** Enter anything and press enter to terminate the program **\n");
   getchar();
   return 0;
 }
+

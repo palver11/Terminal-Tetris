@@ -69,7 +69,7 @@ const char* STICK[5] = {
 //                     Functions
 // --------------------------------------------------
 
-void draw_field(const char** land) {
+void draw_element(const char** land) {
 
   int rows = 0;
   // Get the number of rows in the array
@@ -84,4 +84,12 @@ void draw_field(const char** land) {
     }
     printf("\n");
   }
+}
+
+void compound() {
+  
+}
+
+void render() {
+
 }
