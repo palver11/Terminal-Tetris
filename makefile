@@ -2,7 +2,8 @@
 CC = gcc
 
 # Define any compile-time flags
-CFLAGS = -g -Wall -Wextra -pedantic -std=c11
+FLAGS_H = -g -Wall -Wextra -pedantic -std=c11 # Hard flags
+FLAGS_E = -g -std=c11 # Easy flags
 
 # Define the source files
 SRC = terg.c snake.c
@@ -11,4 +12,4 @@ SRC = terg.c snake.c
 EXEC = -o TerminalGames
 
 make:
-	gcc $(SRC) $(EXEC) $(CFLAGS)
+	gcc $(SRC) $(EXEC) $(FLAGS_E)
