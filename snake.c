@@ -26,7 +26,7 @@ static void fill_field(game_field (*f)[F_WIDTH]) {
   row[0][F_WIDTH - 1] = '\0';
   row[1][F_WIDTH - 1] = '\0';
   
-  // fill the field
+  // Fill the field
   for (int i = 0; i < F_HEIGHT; i++) {
     if (i == 0 || i == (F_HEIGHT - 1)) {
       strcpy(f[i], row[0]);
