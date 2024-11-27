@@ -13,3 +13,4 @@ EXEC = -o TerminalGames
 
 make:
 	gcc $(SRC) $(EXEC) $(FLAGS_E)
+
