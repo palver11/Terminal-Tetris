@@ -10,6 +10,14 @@
 #define TITLE "Snake Game"
 #define WALL_SYMB '#'
 #define ARENA_SPACE ' '
+#define SNAKE_HEAD 'O'
+
+// Game constants
+#define START_POSX 15
+#define START_POSY 15
+
+// Custom Types
+typedef float vector[2];
 
 static void fill_field(game_field (*f)[F_WIDTH]) {
   char row[2][F_WIDTH]; // row[0] - top and bottom, row[1] - left and right
@@ -36,6 +44,10 @@ static void fill_field(game_field (*f)[F_WIDTH]) {
   }  
 }
 
+static void place_snake(game_field (*f)[F_HEIGHT][F_WIDTH]) {
+  game_field[START_POSX][START_POSY] = SNAKE_HEAD;
+}
+
 static void draw_field(game_field (*f)[F_WIDTH]) {
 // NOTE(Pavel): Printing the title as fix of the problem of the terminal consuming top row of the arena
   //Printing Title
@@ -46,7 +58,7 @@ static void draw_field(game_field (*f)[F_WIDTH]) {
   }  
 }
 
-// Main loop of the Snake game
+// MAIN LOOP OF THE SNAKE GAME
 int game_loop() {
   // Building visuals
   game_field field[F_HEIGHT][F_WIDTH];
