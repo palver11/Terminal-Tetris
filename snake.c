@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include <stdbool.h>
+#include <assert.h>
 
 // Misc Consts
 #define DELAY 300 // ms
@@ -32,6 +33,8 @@ typedef struct vector {
   int x;
   int y;
 } vector;
+
+char GAME_OVER[F_HEIGHT][F_WIDTH];
 
 static void fill_field(game_field (*f)[F_WIDTH]) {
   char row[2][F_WIDTH]; // row[0] - top and bottom, row[1] - left and right
@@ -96,7 +99,7 @@ static void draw_field(game_field (*f)[F_WIDTH]) {
 
 // MAIN LOOP OF THE SNAKE GAME
 int game_loop() {
-  bool PLAYING = true;
+  bool Playing = true;
   enum movement move_direction = LEFT;
 
   vector snake_head_pos = START_POS;
@@ -106,7 +109,7 @@ int game_loop() {
 
 
   // Game Loop
-  while (PLAYING) {
+  while (Playing) {
     system("cls");
 
     fill_field(field);
@@ -114,8 +117,54 @@ int game_loop() {
     move_snake(&snake_head_pos, move_direction);
 
     draw_field(field);
+    //Check if the snake has hit a wall
+    if (snake_head_pos.x == 0 || 
+        snake_head_pos.y == 0 || 
+        snake_head_pos.x == (F_WIDTH - 2) ||
+        snake_head_pos.y == (F_HEIGHT - 1)
+        ) {
+      Playing = false;
+      system("cls");
+      draw_field(GAME_OVER);
+//    puts("\nGAME OVER!");
+    }
+
     Sleep(DELAY);
   }
   
   return 0;
 }
+
+
+char GAME_OVER[F_HEIGHT][F_WIDTH] = {
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "#######                #######",
+  "#######   GAME OVER!   #######",
+  "#######                #######",
+  "##############################",
+  "####### score:         #######",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+  "##############################",
+};
