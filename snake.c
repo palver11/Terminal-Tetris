@@ -1,23 +1,37 @@
 #include <string.h>
 #include <stdio.h>
 #include <windows.h>
+#include <stdbool.h>
 
-#define F_WIDTH 30  +1 // 1 for NULL
-#define F_HEIGHT 30
-#define game_field char
+// Misc Consts
+#define DELAY 300 // ms
+#define VECZERO {0, 0}
 
 // Graphics constants
 #define TITLE "Snake Game"
 #define WALL_SYMB '#'
 #define ARENA_SPACE ' '
-#define SNAKE_HEAD 'O'
+#define SNAKE_HEAD '0'
+#define SNAKE_BODY 'X'
+#define FOOD '*'
 
 // Game constants
-#define START_POSX 15
-#define START_POSY 15
+#define F_WIDTH 30  +1 // 1 for NULL
+#define F_HEIGHT 30
+
+#define START_POS {15, 15}
+
+// Enums
+enum movement {
+  UP, DOWN, LEFT, RIGHT
+};
 
 // Custom Types
-typedef float vector[2];
+typedef char game_field;
+typedef struct vector {
+  int x;
+  int y;
+} vector;
 
 static void fill_field(game_field (*f)[F_WIDTH]) {
   char row[2][F_WIDTH]; // row[0] - top and bottom, row[1] - left and right
@@ -44,12 +58,34 @@ static void fill_field(game_field (*f)[F_WIDTH]) {
   }  
 }
 
-static void place_snake(game_field (*f)[F_HEIGHT][F_WIDTH]) {
-  game_field[START_POSX][START_POSY] = SNAKE_HEAD;
+static void place_snake(game_field (*f)[F_WIDTH], vector h_pos) {
+  f[h_pos.y][h_pos.x] = SNAKE_HEAD;
+}
+
+static void move_snake(vector *v, int direction) {
+  if ((v->x + 1) < (F_WIDTH - 1) &&
+      (v->x + 1) > 0 &&
+      (v->y + 1) < (F_HEIGHT- 1) &&
+      (v->y + 1) > 0
+      ) {
+    switch (direction) {
+      case 0: // UP
+        v->y += 1;
+        break;
+      case 1: // DOWN
+        v->y -= 1;
+        break;
+      case 2: // LEFT
+        v->x += 1;
+        break;
+      case 3: // RIGHT
+        v->x -= 1;
+        break;
+    }
+  }
 }
 
 static void draw_field(game_field (*f)[F_WIDTH]) {
-// NOTE(Pavel): Printing the title as fix of the problem of the terminal consuming top row of the arena
   //Printing Title
   puts("\n" TITLE "\n");
 
@@ -60,16 +96,25 @@ static void draw_field(game_field (*f)[F_WIDTH]) {
 
 // MAIN LOOP OF THE SNAKE GAME
 int game_loop() {
+  bool PLAYING = true;
+  enum movement move_direction = LEFT;
+
+  vector snake_head_pos = START_POS;
+
   // Building visuals
   game_field field[F_HEIGHT][F_WIDTH];
 
-  fill_field(field);
 
   // Game Loop
-  while (1) {
+  while (PLAYING) {
     system("cls");
+
+    fill_field(field);
+    place_snake(field, snake_head_pos);
+    move_snake(&snake_head_pos, move_direction);
+
     draw_field(field);
-    Sleep(1000);
+    Sleep(DELAY);
   }
   
   return 0;
