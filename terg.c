@@ -8,11 +8,13 @@ enum GAME_LIST { EXIT, SNAKE };
 int main() {
   enum GAME_LIST selected;
   
+  // NOTE(Pavel): MAKE CONFIRMATION WITHOUT ENTER, with getch()?
   puts("\n" "Terminal Game by Palver"
        "\n" "1. Snake"
        "\n" "0. Exit"
       );
   scanf("%d", &selected);
+  // NOTE(Pavel): REPLACE WITH clear_screen()
   system("cls");
 
   switch (selected) {
@@ -22,10 +24,6 @@ int main() {
       game_loop();
       break;
   }
-
-// NOTE(Pavel): test how compiler may know when the array ends,
-// make separated assigning if it's possible
-// int arr[][10];
 
   puts("\n" "Press any key to escape...");
   getch();

@@ -7,22 +7,22 @@
 
 
 // Misc Consts
-#define DELAY 1000/30 // ms | 1sec/fps
+#define DELAY 1000/10 // ms | 1sec/fps
 #define VECZERO {0, 0}
 
 // Graphics constants
 #define TITLE "Snake Game"
-#define WALL_SYMB '#'
-#define ARENA_SPACE ' '
+#define SYMB_WALL '#'
+#define SYMB_SPACE ' '
 #define SNAKE_HEAD '0'
 #define SNAKE_BODY 'X'
 #define FOOD '*'
 
 // Game constants
-#define F_WIDTH 60  +1 // 1 for NULL
+#define F_WIDTH (60 + 1) // 1 for NULL
 #define F_HEIGHT 30
 
-#define START_POS {15, 15}
+#define START_POS {F_WIDTH / 2, F_HEIGHT / 2}
 
 // Enums
 enum movement {
@@ -36,19 +36,33 @@ typedef struct vector {
   int y;
 } vector;
 
+// Global variables
 char GAME_OVER[F_HEIGHT][F_WIDTH];
+
+
+// FUNCTIONS
+// TODO(Pavel): Make a .h with functions that will be useful for every game. Move clear_screen() there.
+void clear_screen(bool mode) {
+    if (mode) {
+      COORD coord = {0, 0};
+      SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+    }
+    else {
+      system("cls");
+    }
+}
 
 static void fill_field(game_field (*f)[F_WIDTH]) {
   char row[2][F_WIDTH]; // row[0] - top and bottom, row[1] - left and right
 
   // Makes row template
   for (int i = 0; i < (F_WIDTH - 1); i++) {
-    if (i == 0 || i == (F_HEIGHT - 1)) {
-      row[1][i] = WALL_SYMB;
+    if (i == 0 || i == (F_WIDTH - 2)) {
+      row[1][i] = SYMB_WALL;
     } else {
-      row[1][i] = ARENA_SPACE;
+      row[1][i] = SYMB_SPACE;
     }
-    row[0][i] = WALL_SYMB; 
+    row[0][i] = SYMB_WALL; 
   }  
   row[0][F_WIDTH - 1] = '\0';
   row[1][F_WIDTH - 1] = '\0';
@@ -63,15 +77,40 @@ static void fill_field(game_field (*f)[F_WIDTH]) {
   }  
 }
 
+static void fill_gameover(game_field (*f)[F_WIDTH]) {
+  const char SCORE[3][17] = {
+    "   GAME OVER!   ",
+    "                ",
+    " score:         "
+  };
+  char wall_row[F_WIDTH];
+
+  for (int i = 0; i < (F_WIDTH - 1); i++) {
+    wall_row[i] = SYMB_WALL;
+  }  
+  for (int i = 0; i < F_HEIGHT; i++) {
+    strcpy(f[i], wall_row);
+  }  
+
+  int first_line = (F_HEIGHT / 2) - 2;
+  for (int fi = (F_WIDTH / 2) - ((17 - 1) / 2), i = 0; i < (17 - 1); fi++, i++) {
+    f[first_line][fi] = SCORE[1][i];
+    f[first_line+1][fi] = SCORE[0][i];
+    f[first_line+2][fi] = SCORE[1][i];
+    f[first_line+3][fi] = SCORE[2][i];
+  }  
+
+}
+
 static void place_snake(game_field (*f)[F_WIDTH], vector h_pos) {
   f[h_pos.y][h_pos.x] = SNAKE_HEAD;
 }
 
 static void move_snake(vector *v, int direction) {
-  if ((v->x + 1) < (F_WIDTH - 1) &&
-      (v->x + 1) > 0 &&
-      (v->y + 1) < (F_HEIGHT- 1) &&
-      (v->y + 1) > 0
+  if ((v->x + 1) <= (F_WIDTH - 1) &&
+      (v->x + 1) >= 0 &&
+      (v->y + 1) <= (F_HEIGHT) &&
+      (v->y + 1) >= 0
       ) {
     switch (direction) {
       case 0: // UP
@@ -93,6 +132,7 @@ static void move_snake(vector *v, int direction) {
 }
 
 static void draw_field(game_field (*f)[F_WIDTH]) {
+  clear_screen(true);
   //Printing Title
   puts("\n" TITLE "\n");
 
@@ -101,53 +141,52 @@ static void draw_field(game_field (*f)[F_WIDTH]) {
   }  
 }
 
+void check_input(enum movement *move_dir) {
+  if (GetAsyncKeyState('W') & 0x8000) {
+    *move_dir = UP;
+  }
+  else if (GetAsyncKeyState('S') & 0x8000) {
+    *move_dir = DOWN;
+  }
+  else if (GetAsyncKeyState('A') & 0x8000) {
+    *move_dir = LEFT;
+  }
+  else if (GetAsyncKeyState('D') & 0x8000) {
+    *move_dir = RIGHT;
+  }
+}
+
 // MAIN LOOP OF THE SNAKE GAME
 int game_loop() {
-  bool Playing = true;
+  bool playing = true;
   enum movement move_direction = IDLE;
   vector snake_head_pos = START_POS;
   char input;
 
   // Building visuals
   game_field field[F_HEIGHT][F_WIDTH];
+  game_field game_over[F_HEIGHT][F_WIDTH];
 
   // Game Loop
-  while (Playing) {
-    system("cls");
+  while (playing) {
 
     fill_field(field);
+    fill_gameover(game_over);
     place_snake(field, snake_head_pos);
     move_snake(&snake_head_pos, move_direction);
-
-    if (_kbhit()) {
-      input = _getch();
-      switch (input) {
-        case 'w':
-          move_direction = UP;
-          break;
-        case 's':
-          move_direction = DOWN;
-          break;
-        case 'a':
-          move_direction = LEFT;
-          break;
-        case 'd':
-          move_direction = RIGHT;
-          break;
-      }
-    }
+    check_input(&move_direction);
 
     draw_field(field);
+    //Game over condition
     //Check if the snake has hit a wall
-    if (snake_head_pos.x == 0 || 
-        snake_head_pos.y == 0 || 
-        snake_head_pos.x == (F_WIDTH - 2) ||
-        snake_head_pos.y == (F_HEIGHT - 1)
+    if (snake_head_pos.x <= 0 || 
+        snake_head_pos.y <= 0 || 
+        snake_head_pos.x >= (F_WIDTH - 1) ||
+        snake_head_pos.y >= (F_HEIGHT)
         ) {
-      Playing = false;
-      system("cls");
-      draw_field(GAME_OVER);
-//    puts("\nGAME OVER!");
+      playing = false;
+      draw_field(game_over);
+      getch();
     }
 
     Sleep(DELAY);
@@ -156,37 +195,4 @@ int game_loop() {
   return 0;
 }
 
-// MORE GRAPHICS
-
-char GAME_OVER[F_HEIGHT][F_WIDTH] = {
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "#######                #######",
-  "#######   GAME OVER!   #######",
-  "#######                #######",
-  "##############################",
-  "####### score:         #######",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-  "##############################",
-};
+// NOTE(Pavel): Bug:If you hit the upper wall console closes immediately unlike the right all
