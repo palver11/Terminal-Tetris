@@ -73,16 +73,16 @@ static void move_snake(vector *v, int direction) {
       ) {
     switch (direction) {
       case 0: // UP
-        v->y += 1;
+        v->y++;
         break;
       case 1: // DOWN
-        v->y -= 1;
+        v->y--;
         break;
       case 2: // LEFT
-        v->x += 1;
+        v->x++;
         break;
       case 3: // RIGHT
-        v->x -= 1;
+        v->x--;
         break;
     }
   }
@@ -101,12 +101,10 @@ static void draw_field(game_field (*f)[F_WIDTH]) {
 int game_loop() {
   bool Playing = true;
   enum movement move_direction = LEFT;
-
   vector snake_head_pos = START_POS;
 
   // Building visuals
   game_field field[F_HEIGHT][F_WIDTH];
-
 
   // Game Loop
   while (Playing) {
@@ -135,6 +133,7 @@ int game_loop() {
   return 0;
 }
 
+// MORE GRAPHICS
 
 char GAME_OVER[F_HEIGHT][F_WIDTH] = {
   "##############################",
