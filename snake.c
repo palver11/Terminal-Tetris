@@ -3,9 +3,11 @@
 #include <windows.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <conio.h>
+
 
 // Misc Consts
-#define DELAY 300 // ms
+#define DELAY 1000/30 // ms | 1sec/fps
 #define VECZERO {0, 0}
 
 // Graphics constants
@@ -17,14 +19,14 @@
 #define FOOD '*'
 
 // Game constants
-#define F_WIDTH 30  +1 // 1 for NULL
+#define F_WIDTH 60  +1 // 1 for NULL
 #define F_HEIGHT 30
 
 #define START_POS {15, 15}
 
 // Enums
 enum movement {
-  UP, DOWN, LEFT, RIGHT
+  UP, DOWN, LEFT, RIGHT, IDLE
 };
 
 // Custom Types
@@ -73,17 +75,19 @@ static void move_snake(vector *v, int direction) {
       ) {
     switch (direction) {
       case 0: // UP
-        v->y++;
-        break;
-      case 1: // DOWN
         v->y--;
         break;
-      case 2: // LEFT
-        v->x++;
+      case 1: // DOWN
+        v->y++;
         break;
-      case 3: // RIGHT
+      case 2: // LEFT
         v->x--;
         break;
+      case 3: // RIGHT
+        v->x++;
+        break;
+//    default:
+        
     }
   }
 }
@@ -100,8 +104,9 @@ static void draw_field(game_field (*f)[F_WIDTH]) {
 // MAIN LOOP OF THE SNAKE GAME
 int game_loop() {
   bool Playing = true;
-  enum movement move_direction = LEFT;
+  enum movement move_direction = IDLE;
   vector snake_head_pos = START_POS;
+  char input;
 
   // Building visuals
   game_field field[F_HEIGHT][F_WIDTH];
@@ -113,6 +118,24 @@ int game_loop() {
     fill_field(field);
     place_snake(field, snake_head_pos);
     move_snake(&snake_head_pos, move_direction);
+
+    if (_kbhit()) {
+      input = _getch();
+      switch (input) {
+        case 'w':
+          move_direction = UP;
+          break;
+        case 's':
+          move_direction = DOWN;
+          break;
+        case 'a':
+          move_direction = LEFT;
+          break;
+        case 'd':
+          move_direction = RIGHT;
+          break;
+      }
+    }
 
     draw_field(field);
     //Check if the snake has hit a wall
