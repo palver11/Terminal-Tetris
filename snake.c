@@ -43,7 +43,7 @@ char GAME_OVER[F_HEIGHT][F_WIDTH];
 static void fill_field(game_field (*f)[F_WIDTH]) {
   char row[2][F_WIDTH]; // row[0] - top and bottom, row[1] - left and right
 
-  // Makes row template
+  // Makes the row template
   for (int i = 0; i < (F_WIDTH - 1); i++) {
     if (i == 0 || i == (F_WIDTH - 2)) {
       row[1][i] = SYMB_WALL;
