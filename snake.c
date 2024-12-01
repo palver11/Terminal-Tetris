@@ -164,7 +164,7 @@ int game_loop() {
     draw_game(field);
 
     //Game over condition
-    //Check if the snake has hit a wall
+    //Checks if the snake has hit a wall
     if (snake_head_pos.x == 0 || 
         snake_head_pos.y == 0 || 
         snake_head_pos.x == (F_WIDTH - 2) ||
