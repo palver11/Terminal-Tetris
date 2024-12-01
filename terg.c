@@ -2,20 +2,22 @@
 #include <stdio.h>
 #include <conio.h>
 #include "snake.h"
-
-enum GAME_LIST { EXIT, SNAKE };
+#include "univf.h"
 
 int main() {
-  enum GAME_LIST selected;
+  int selected;
   
-  // NOTE(Pavel): MAKE CONFIRMATION WITHOUT ENTER, with getch()?
-  puts("\n" "Terminal Game by Palver"
+  puts("\n" "Terminal Games by Palver"
        "\n" "1. Snake"
        "\n" "0. Exit"
       );
-  scanf("%d", &selected);
-  // NOTE(Pavel): REPLACE WITH clear_screen()
-  system("cls");
+
+  // Check if a valid key was pressed
+  do {
+    selected = (int)getch() - 48; //1-9 is ASCII 48-57
+  } while (selected < 0 || selected > 1);
+
+  clear_screen(false);
 
   switch (selected) {
     case 0:

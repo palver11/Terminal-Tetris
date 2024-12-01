@@ -1,9 +1,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <windows.h>
-#include <stdbool.h>
 #include <assert.h>
 #include <conio.h>
+#include "univf.h"
 
 
 // Misc Consts
@@ -39,19 +39,7 @@ typedef struct vector {
 // Global variables
 char GAME_OVER[F_HEIGHT][F_WIDTH];
 
-
 // FUNCTIONS
-// TODO(Pavel): Make a .h with functions that will be useful for every game. Move clear_screen() there.
-void clear_screen(bool mode) {
-    if (mode) {
-      COORD coord = {0, 0};
-      SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-    }
-    else {
-      system("cls");
-    }
-}
-
 static void fill_field(game_field (*f)[F_WIDTH]) {
   char row[2][F_WIDTH]; // row[0] - top and bottom, row[1] - left and right
 
@@ -97,9 +85,8 @@ static void fill_gameover(game_field (*f)[F_WIDTH]) {
     f[first_line][fi] = SCORE[1][i];
     f[first_line+1][fi] = SCORE[0][i];
     f[first_line+2][fi] = SCORE[1][i];
-    f[first_line+3][fi] = SCORE[2][i];
+    f[first_line+4][fi] = SCORE[2][i];
   }  
-
 }
 
 static void place_snake(game_field (*f)[F_WIDTH], vector h_pos) {
@@ -107,10 +94,10 @@ static void place_snake(game_field (*f)[F_WIDTH], vector h_pos) {
 }
 
 static void move_snake(vector *v, int direction) {
-  if ((v->x + 1) <= (F_WIDTH - 1) &&
-      (v->x + 1) >= 0 &&
-      (v->y + 1) <= (F_HEIGHT) &&
-      (v->y + 1) >= 0
+  if ((v->x) < (F_WIDTH - 1) &&
+      (v->x) > 0 &&
+      (v->y) < (F_HEIGHT) &&
+      (v->y) > 0
       ) {
     switch (direction) {
       case 0: // UP
@@ -131,7 +118,7 @@ static void move_snake(vector *v, int direction) {
   }
 }
 
-static void draw_field(game_field (*f)[F_WIDTH]) {
+static void draw_game(game_field (*f)[F_WIDTH]) {
   clear_screen(true);
   //Printing Title
   puts("\n" TITLE "\n");
@@ -141,7 +128,7 @@ static void draw_field(game_field (*f)[F_WIDTH]) {
   }  
 }
 
-void check_input(enum movement *move_dir) {
+static void check_input(enum movement *move_dir) {
   if (GetAsyncKeyState('W') & 0x8000) {
     *move_dir = UP;
   }
@@ -158,7 +145,6 @@ void check_input(enum movement *move_dir) {
 
 // MAIN LOOP OF THE SNAKE GAME
 int game_loop() {
-  bool playing = true;
   enum movement move_direction = IDLE;
   vector snake_head_pos = START_POS;
   char input;
@@ -168,31 +154,31 @@ int game_loop() {
   game_field game_over[F_HEIGHT][F_WIDTH];
 
   // Game Loop
-  while (playing) {
+  while (true) {
 
     fill_field(field);
     fill_gameover(game_over);
-    place_snake(field, snake_head_pos);
     move_snake(&snake_head_pos, move_direction);
+    place_snake(field, snake_head_pos);
     check_input(&move_direction);
+    draw_game(field);
 
-    draw_field(field);
     //Game over condition
     //Check if the snake has hit a wall
-    if (snake_head_pos.x <= 0 || 
-        snake_head_pos.y <= 0 || 
-        snake_head_pos.x >= (F_WIDTH - 1) ||
-        snake_head_pos.y >= (F_HEIGHT)
+    if (snake_head_pos.x == 0 || 
+        snake_head_pos.y == 0 || 
+        snake_head_pos.x == (F_WIDTH - 2) ||
+        snake_head_pos.y == (F_HEIGHT - 1)
         ) {
-      playing = false;
-      draw_field(game_over);
-      getch();
+      break;
     }
 
     Sleep(DELAY);
   }
+
+  draw_game(game_over);
+  puts("\n" "Press any key to escape...");
+  getch();
   
   return 0;
 }
-
-// NOTE(Pavel): Bug:If you hit the upper wall console closes immediately unlike the right all

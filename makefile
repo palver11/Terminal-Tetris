@@ -6,7 +6,7 @@ FLAGS_H = -g -Wall -Wextra -pedantic -std=c11 # Hard flags
 FLAGS_E = -g -std=c11 # Easy flags
 
 # Define the source files
-SRC = terg.c snake.c
+SRC = terg.c univf.c snake.c 
 
 # Define the executable file
 EXEC = -o TerminalGames
