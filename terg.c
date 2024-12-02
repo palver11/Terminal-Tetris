@@ -8,7 +8,7 @@
 //  NOTE(Pavel): included for testing, delete later
 #include <time.h>
 static void TESTING_MODE() {
-  printf("%d", time(0)*1000);
+  printf("%lld", time(0)*1000);
 }
 
 int main() {

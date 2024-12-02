@@ -10,19 +10,18 @@
 // Misc Consts
 #define DELAY 1000/10 // ms | 1sec/fps
 #define VECZERO {0, 0}
-#define FOOD_INDENT 1
+#define FOOD_INDENT 3
 
 // Graphics constants
 #define TITLE "Snake Game"
 #define SYMB_WALL '#'
 #define SYMB_SPACE ' '
-#define SNAKE_HEAD '0'
-#define SNAKE_BODY 'X'
-#define FOOD '*'
+#define SNAKE_BODY 'O'
+#define FOOD '+'
 
 // Game constants
 #define F_WIDTH (60 + 1) // 1 for NULL
-#define F_HEIGHT 30
+#define F_HEIGHT 30 
 
 #define START_POS {F_WIDTH / 2, F_HEIGHT / 2, -1, -1, NULL}
 
@@ -86,26 +85,30 @@ static void fill_gameover(game_field (*f)[F_WIDTH]) {
     f[first_line][fi] = SCORE[1][i];
     f[first_line+1][fi] = SCORE[0][i];
     f[first_line+2][fi] = SCORE[1][i];
-    f[first_line+4][fi] = SCORE[2][i];
+//    f[first_line+4][fi] = SCORE[2][i];
   }  
 }
 
 static void place_snake(game_field (*f)[F_WIDTH], llist_snake *s) {
   // Place the head
-  f[s->y][s->x] = SNAKE_HEAD;
-
-  // Place the snake
-
+    f[s->y][s->x] = SNAKE_BODY;
+  // Place the tail
+  while (s->next != NULL) { 
+    s = s->next;
+    f[s->y][s->x] = SNAKE_BODY;
+  }
 }
 
 static void move_snake(llist_snake *s, int direction) {
+  // Move the head
   if ((s->x) < (F_WIDTH - 1) &&
       (s->x) > 0 &&
       (s->y) < (F_HEIGHT) &&
-      (s->y) > 0
-     ) {
+      (s->y) > 0) {
+    // save old coordinates
     s->prev_y = s->y;
     s->prev_x = s->x;
+    // move
     switch (direction) {
       case 0: // UP
         s->y--;
@@ -120,6 +123,17 @@ static void move_snake(llist_snake *s, int direction) {
         s->x++;
         break;
     }
+    // Move the tail
+    while (s->next != NULL) {
+      //save old coorinates
+      s->next->prev_x = s->next->x;
+      s->next->prev_y = s->next->y;
+      //move
+      s->next->x = s->prev_x;
+      s->next->y = s->prev_y;
+      //change node
+      s = s->next;
+    }    
   }
 }
 
@@ -130,7 +144,7 @@ static void place_food(bool *consumed, vector *f_pos, game_field (*f)[F_WIDTH], 
     
     // Randomize X and Y positions
     do { // X
-     pos.x = rand();
+      pos.x = rand();
     } while (pos.x > (F_WIDTH - 2 - FOOD_INDENT) || pos.x < (1 + FOOD_INDENT));
     do { // Y
       pos.y = rand();
@@ -147,27 +161,27 @@ static void place_food(bool *consumed, vector *f_pos, game_field (*f)[F_WIDTH], 
 
 static void snake_eat_food(bool *consumed, llist_snake *s) {
   *consumed = true;
-  llist_snake *tmp = s;
   llist_snake *node = malloc(sizeof(llist_snake)); 
 
   // get the last part of the snake
-  while (tmp->next != NULL) {
-    tmp = tmp->next;
+  while (s->next != NULL) {
+    s = s->next;
   }
 
 //  NOTE(Pavel): do I need prev or currient pos? what will come first?  
-  node->x      = tmp->prev_x;
-  node->y      = tmp->prev_y;
+  node->x      = s->prev_x;
+  node->y      = s->prev_y;
   node->prev_x = -1;
   node->prev_y = -1;
   node->next   = NULL;
-  tmp->next    = node;
+  s->next    = node;
 }
 
-static void draw_game(game_field (*f)[F_WIDTH]) {
+static void draw_game(game_field (*f)[F_WIDTH], int *score) {
   clear_screen(true);
   //Printing Title
   puts("\n" TITLE "\n");
+  printf("\nScore: %d\n", *score );
 
   for (int i = 0; i < F_HEIGHT; i++) {
     puts(f[i]);
@@ -193,33 +207,33 @@ static void check_input(enum movement *move_dir) {
 int game_loop() {
   enum movement move_direction = IDLE;
   llist_snake snake = START_POS;
-  char input;
   vector food_pos = {-1, -1};
   bool food_consumed = true;
-//int food_quantity_ate = 0;
+  int food_score = 0;
 
   srand(time(0));
 
   // Building visuals
-  game_field field[F_HEIGHT][F_WIDTH];
-  game_field game_over[F_HEIGHT][F_WIDTH];
+  game_field scrn_field[F_HEIGHT][F_WIDTH];
+  game_field scrn_game_over[F_HEIGHT][F_WIDTH];
 
   // Game Loop
   while (true) {
 
-    fill_field(field);
-    fill_gameover(game_over);
+    fill_field(scrn_field);
+    fill_gameover(scrn_game_over);
     move_snake(&snake, move_direction);
-    place_food(&food_consumed, &food_pos, field, &snake);
-    place_snake(field, &snake);
+    place_food(&food_consumed, &food_pos, scrn_field, &snake);
+    place_snake(scrn_field, &snake);
     check_input(&move_direction);
-    draw_game(field);
+
     if (snake.x == food_pos.x && snake.y == food_pos.y) {
       snake_eat_food(&food_consumed, &snake);
+      food_score++;
     }
 
-    //Game over condition
-    //Checks if the snake has hit a wall
+    //Game over conditions
+    //If the snake has hit a wall
     if (snake.x == 0 || 
         snake.y == 0 || 
         snake.x == (F_WIDTH - 2) ||
@@ -227,12 +241,32 @@ int game_loop() {
         ) {
       break;
     }
+    //If the snake has hit yourself
+    if (snake.next != NULL) {
+      llist_snake *tmp = snake.next;
+      bool is_game_over = false;
 
+      while (true) {
+        if (snake.x == tmp->x && snake.y == tmp->y) {
+          is_game_over = true;
+          break;
+        } else if (tmp->next != NULL) {
+          tmp = tmp->next;
+        } else {break;}
+      }
+      if (is_game_over) {break;}
+    }
+    draw_game(scrn_field, &food_score);
     Sleep(DELAY);
   }
 
-  draw_game(game_over);
+  draw_game(scrn_game_over, &food_score);
   puts("\n" "Press any key to escape...");
+//  NOTE(Pavel): WHY IT CLOSES?  
+  getch();
+  getch();
+  getch();
+  getch();
   getch();
   
   return 0;

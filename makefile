@@ -3,7 +3,7 @@ CC = gcc
 
 # Define any compile-time flags
 FLAGS_H = -g -Wall -Wextra -pedantic -std=c11 # Hard flags
-FLAGS_E = -g -std=c11 # Easy flags
+FLAGS_E = -g -std=c11 -Wall # Easy flags
 
 # Define the source files
 SRC = terg.c univf.c snake.c 
