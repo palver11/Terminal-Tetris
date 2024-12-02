@@ -24,7 +24,7 @@
 #define F_HEIGHT 30 
 
 #define START_POS {F_WIDTH / 2, F_HEIGHT / 2, -1, -1, NULL}
-#define SNAKE_INIT_LEN 4
+#define SNAKE_INIT_LEN 1
 
 // Enums
 enum movement {UP, DOWN, LEFT, RIGHT, IDLE};
