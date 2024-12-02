@@ -24,6 +24,7 @@
 #define F_HEIGHT 30 
 
 #define START_POS {F_WIDTH / 2, F_HEIGHT / 2, -1, -1, NULL}
+#define SNAKE_INIT_LEN 4
 
 // Enums
 enum movement {UP, DOWN, LEFT, RIGHT, IDLE};
@@ -203,6 +204,20 @@ static void check_input(enum movement *move_dir) {
   }
 }
 
+static void grow_snake(llist_snake *s, int s_init_len) {
+  llist_snake *tmp = s;
+  for (int i = 0; i < 10; i++) {
+    llist_snake *node = malloc(sizeof(llist_snake));
+    node->x = tmp->x;
+    node->y = tmp->y+1;
+    node->prev_x = -1;
+    node->prev_y = -1;
+    node->next = NULL;
+    s->next = node;
+    tmp = node;
+  }  
+}
+
 // MAIN LOOP OF THE SNAKE GAME
 int game_loop() {
   enum movement move_direction = IDLE;
@@ -212,6 +227,7 @@ int game_loop() {
   int food_score = 0;
 
   srand(time(0));
+  grow_snake(&snake, SNAKE_INIT_LEN);
 
   // Building visuals
   game_field scrn_field[F_HEIGHT][F_WIDTH];
