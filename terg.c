@@ -38,8 +38,8 @@ int main() {
       break;
   }
 
-  puts("\n" "Press any key to escape...");
-  getch();
+//  puts("\n" "Press any key to escape...");
+//  system("pause");
 
   return 0;
 }

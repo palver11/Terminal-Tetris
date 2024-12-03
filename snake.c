@@ -20,10 +20,12 @@
 #define FOOD '+'
 
 // Game constants
-#define F_WIDTH (60 + 1) // 1 for NULL
+//  NOTE(Pavel): 55x30 is about minimal working size. For some reason the lesser size
+//               causing a visual bug. I'm not fixing this, I'm done with this project :[
+#define F_WIDTH (55 + 1) // 1 for NULL
 #define F_HEIGHT 30 
 
-#define START_POS {F_WIDTH / 2, F_HEIGHT / 2, -1, -1, NULL}
+#define START_POS {(F_WIDTH / 2), (F_HEIGHT / 2), (F_WIDTH / 2), (F_HEIGHT / 2 + 1), NULL}
 #define SNAKE_INIT_LEN 1
 
 // Enums
@@ -100,41 +102,67 @@ static void place_snake(game_field (*f)[F_WIDTH], llist_snake *s) {
   }
 }
 
-static void move_snake(llist_snake *s, int direction) {
-  // Move the head
+static void move_snake(llist_snake *s, enum movement *move_dir) {
   if ((s->x) < (F_WIDTH - 1) &&
       (s->x) > 0 &&
       (s->y) < (F_HEIGHT) &&
       (s->y) > 0) {
-    // save old coordinates
-    s->prev_y = s->y;
-    s->prev_x = s->x;
-    // move
-    switch (direction) {
-      case 0: // UP
-        s->y--;
-        break;
-      case 1: // DOWN
-        s->y++;
-        break;
-      case 2: // LEFT
-        s->x--;
-        break;
-      case 3: // RIGHT
-        s->x++;
-        break;
+
+    if (GetAsyncKeyState('W') & 0x8000) {
+      if (s->x != s->next->x || s->y-1 != s->next->y) {
+        *move_dir = UP;
+      }
     }
-    // Move the tail
-    while (s->next != NULL) {
-      //save old coorinates
-      s->next->prev_x = s->next->x;
-      s->next->prev_y = s->next->y;
-      //move
-      s->next->x = s->prev_x;
-      s->next->y = s->prev_y;
-      //change node
-      s = s->next;
-    }    
+    else if (GetAsyncKeyState('S') & 0x8000) {
+      if (s->x != s->next->x || s->y+1 != s->next->y) {
+        *move_dir = DOWN;
+      }
+    }
+    else if (GetAsyncKeyState('A') & 0x8000) {
+      if (s->x-1 != s->next->x || s->y != s->next->y) {
+        *move_dir = LEFT;
+      }
+    }
+    else if (GetAsyncKeyState('D') & 0x8000) {
+      if (s->x+1 != s->next->x || s->y != s->next->y) {
+        *move_dir = RIGHT;
+      }
+    }
+    
+    if (*move_dir != IDLE) {
+      // save old coordinates
+      s->prev_y = s->y;
+      s->prev_x = s->x;
+      
+      // move
+      switch (*move_dir) {
+        case UP:
+          s->y--;
+          break;
+        case DOWN:
+          s->y++;
+          break;
+        case LEFT:
+          s->x--;
+          break;
+        case RIGHT:
+          s->x++;
+          break;
+        default:
+          break;
+      }
+      // Move the tail
+      while (s->next != NULL) {
+        //save old coorinates
+        s->next->prev_x = s->next->x;
+        s->next->prev_y = s->next->y;
+        //move
+        s->next->x = s->prev_x;
+        s->next->y = s->prev_y;
+        //change node
+        s = s->next;
+      }    
+    }
   }
 }
 
@@ -142,14 +170,30 @@ static void move_snake(llist_snake *s, int direction) {
 static void place_food(bool *consumed, vector *f_pos, game_field (*f)[F_WIDTH], llist_snake *s) {
   if (*consumed) { // set new position
     vector pos = {-1, -1};
+    bool spawned_on_snake = false;
     
     // Randomize X and Y positions
-    do { // X
-      pos.x = rand();
-    } while (pos.x > (F_WIDTH - 2 - FOOD_INDENT) || pos.x < (1 + FOOD_INDENT));
-    do { // Y
-      pos.y = rand();
-    } while (pos.y > (F_HEIGHT - 1 - FOOD_INDENT) || pos.y < (1 + FOOD_INDENT));
+    do {
+      do { // X
+        pos.x = rand();
+      } while (pos.x > (F_WIDTH - 2 - FOOD_INDENT) || pos.x < (1 + FOOD_INDENT));
+
+      do { // Y
+        pos.y = rand();
+      } while (pos.y > (F_HEIGHT - 1 - FOOD_INDENT) || pos.y < (1 + FOOD_INDENT));
+
+      // Check if the food spawned on the snake
+      llist_snake *tmp = s;
+      while (tmp->next != NULL) {
+        if (tmp->x == pos.x || tmp->y == pos.y) {
+          spawned_on_snake = true;
+          break;
+        } else {
+          spawned_on_snake = false;
+          tmp = tmp->next;
+        }
+      }
+    } while (spawned_on_snake);
 
     f_pos->x = pos.x;
     f_pos->y = pos.y;
@@ -182,38 +226,24 @@ static void draw_game(game_field (*f)[F_WIDTH], int *score) {
   clear_screen(true);
   //Printing Title
   puts("\n" TITLE "\n");
-  printf("\nScore: %d\n", *score );
+  printf("\nScore: %d", *score );
+  puts("\n");
 
   for (int i = 0; i < F_HEIGHT; i++) {
     puts(f[i]);
   }  
 }
 
-static void check_input(enum movement *move_dir) {
-  if (GetAsyncKeyState('W') & 0x8000) {
-    *move_dir = UP;
-  }
-  else if (GetAsyncKeyState('S') & 0x8000) {
-    *move_dir = DOWN;
-  }
-  else if (GetAsyncKeyState('A') & 0x8000) {
-    *move_dir = LEFT;
-  }
-  else if (GetAsyncKeyState('D') & 0x8000) {
-    *move_dir = RIGHT;
-  }
-}
-
-static void grow_snake(llist_snake *s, int s_init_len) {
+static void set_len_snake(llist_snake *s, int s_init_len) {
   llist_snake *tmp = s;
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < s_init_len; i++) {
     llist_snake *node = malloc(sizeof(llist_snake));
-    node->x = tmp->x;
-    node->y = tmp->y+1;
-    node->prev_x = -1;
-    node->prev_y = -1;
+    node->x = tmp->prev_x;
+    node->y = tmp->prev_y;
+    node->prev_x = node->x;
+    node->prev_y = node->y+1;
     node->next = NULL;
-    s->next = node;
+    tmp->next = node;
     tmp = node;
   }  
 }
@@ -227,7 +257,7 @@ int game_loop() {
   int food_score = 0;
 
   srand(time(0));
-  grow_snake(&snake, SNAKE_INIT_LEN);
+  set_len_snake(&snake, SNAKE_INIT_LEN);
 
   // Building visuals
   game_field scrn_field[F_HEIGHT][F_WIDTH];
@@ -236,12 +266,13 @@ int game_loop() {
   // Game Loop
   while (true) {
 
-    fill_field(scrn_field);
     fill_gameover(scrn_game_over);
-    move_snake(&snake, move_direction);
-    place_food(&food_consumed, &food_pos, scrn_field, &snake);
+    fill_field(scrn_field);
+
+    move_snake(&snake, &move_direction);
+
     place_snake(scrn_field, &snake);
-    check_input(&move_direction);
+    place_food(&food_consumed, &food_pos, scrn_field, &snake);
 
     if (snake.x == food_pos.x && snake.y == food_pos.y) {
       snake_eat_food(&food_consumed, &snake);
@@ -277,13 +308,11 @@ int game_loop() {
   }
 
   draw_game(scrn_game_over, &food_score);
-  puts("\n" "Press any key to escape...");
-//  NOTE(Pavel): WHY IT CLOSES?  
-  getch();
-  getch();
-  getch();
-  getch();
-  getch();
+  puts("\n" "Press any Enter to escape...");
+
+  getchar(); // NOTE(Pavel): not a best solution to prevent closing, cause record keys the whole game
+
+//  system("pause"); // NOTE(Pavel): player will skip game over screen accidetely by button meshing  
   
   return 0;
 }
