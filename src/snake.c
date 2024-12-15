@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <conio.h>
 #include <time.h>
-#include "univf.h"
+#include "inc/univf.h"
 
 
 // Misc Consts
@@ -249,7 +249,7 @@ static void set_len_snake(llist_snake *s, int s_init_len) {
 }
 
 // MAIN LOOP OF THE SNAKE GAME
-int game_loop() {
+int snake_game_loop() {
   enum movement move_direction = IDLE;
   llist_snake snake = START_POS;
   vector food_pos = {-1, -1};
